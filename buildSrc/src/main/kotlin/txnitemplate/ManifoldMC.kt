@@ -10,16 +10,23 @@ class ManifoldMC {
             isActive: Boolean,
             clearMainProject: Boolean
         ) {
-            val mcVers = listOf("1.18.2", "1.19.2", "1.20.1", "1.21.1")
+            val mcVers = listOf("1.18.2", "1.19.2", "1.20.1", "1.21.1", "26.1.2")
             val mcIndex = mcVers.indexOf(mcString)
             val argList = ArrayList<String>()
 
-            val numericalMC = mcString.substring(2).replace(".", "")
+            // Until 1.21.x the project used values such as 201 and 211. The
+            // new year-based Minecraft versions have no leading "1." to trim.
+            val numericalMC = if (mcString.startsWith("1.")) {
+                mcString.substring(2).replace(".", "")
+            } else {
+                mcString.replace(".", "")
+            }
             argList.add("MC=$numericalMC")
             argList.add("mc=$numericalMC")
 
             for (i in mcVers.indices) {
-                val mcStr = mcVers[i].replace(".", "_").substring(2)
+                val normalizedVersion = mcVers[i].replace(".", "_")
+                val mcStr = if (normalizedVersion.startsWith("1_")) normalizedVersion.substring(2) else normalizedVersion
                 if (mcIndex < i) {
                     argList.add("BEFORE_$mcStr")
                     argList.add("before_$mcStr")

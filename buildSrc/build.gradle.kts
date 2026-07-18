@@ -29,7 +29,7 @@ repositories {
 
 dependencies {
     implementation("me.modmuss50:mod-publish-plugin:0.6.3")
-    implementation("dev.architectury.loom:dev.architectury.loom.gradle.plugin:1.7-SNAPSHOT")
+    implementation("dev.architectury.loom:dev.architectury.loom.gradle.plugin:1.17.491")
 
     implementation("dev.kikugie:stonecutter:0.5-alpha.4")
 }

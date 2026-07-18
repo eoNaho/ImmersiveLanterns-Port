@@ -1,1 +1,5 @@
+#if mc >= "261"
+accessWidener v2 official
+#else
 accessWidener v2 named
+#endif

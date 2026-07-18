@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "toni.immersivelanterns.foundation.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "minVersion": "0.8",
+  "mixins": [],
+  "client": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

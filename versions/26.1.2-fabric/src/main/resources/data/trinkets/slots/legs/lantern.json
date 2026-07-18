@@ -1,0 +1,7 @@
+{
+  "icon": "trinkets:container/slots/belt",
+  "order": -1100,
+  "validator_predicates": [
+    "immersivelanterns:lantern"
+  ]
+}

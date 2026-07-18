@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "${id}",
+  "name": "${display_name}",
+  "version": "${modversion}",
+  "description": "Renders equipped lanterns with movement and dynamic light through Trinkets Updated.",
+  "authors": ["${author}"],
+  "contact": {
+    "sources": "https://github.com/${github}/${name}",
+    "issues": "https://github.com/${github}/${name}/issues"
+  },
+  "license": "${license}",
+  "icon": "assets/${id}/textures/mod_logo.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["${group}.${namespace}.${name}"],
+    "client": ["${group}.${namespace}.${name}"],
+    "modmenu": ["toni.immersivelanterns.ImmersiveLanternsModMenu"]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "${mc}",
+    "fabric-api": "*",
+    "trinkets_updated": ">=4.0.0-beta.3+26.1",
+    "lambdynlights": ">=4.10.2"
+  },
+  "suggests": {
+    "modmenu": ">=18.0.0"
+  },
+  "accessWidener": "${id}.accesswidener"
+}
