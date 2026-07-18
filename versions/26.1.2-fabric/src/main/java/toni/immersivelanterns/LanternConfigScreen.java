@@ -6,7 +6,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 final class LanternConfigScreen extends Screen {
     private final Screen parent;
@@ -87,9 +86,12 @@ final class LanternConfigScreen extends Screen {
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         graphics.centeredText(font, title, width / 2, height / 2 - 108, 0xFFFFFFFF);
         var preview = minecraft.player == null ? ItemStack.EMPTY : ImmersiveLanterns.getEquipped(minecraft.player);
-        if (preview.isEmpty()) preview = new ItemStack(Items.LANTERN);
-        var bob = LanternConfig.get().physics ? (int) Math.round(Math.sin(System.currentTimeMillis() / 240.0) * 2.0) : 0;
-        graphics.item(preview, width / 2 - 8, height / 2 + 72 + bob);
+        if (!preview.isEmpty()) {
+            var bob = LanternConfig.get().physics
+                    ? (int) Math.round(Math.sin(System.currentTimeMillis() / 240.0) * 2.0)
+                    : 0;
+            graphics.item(preview, width / 2 - 8, height / 2 + 72 + bob);
+        }
         if (!saveStatus.getString().isEmpty()) {
             graphics.centeredText(font, saveStatus, width / 2, height / 2 + 106,
                     saveStatus.getString().equals(Component.translatable("immersivelanterns.config.save_error").getString()) ? 0xFFFF5555 : 0xFF55FF55);
