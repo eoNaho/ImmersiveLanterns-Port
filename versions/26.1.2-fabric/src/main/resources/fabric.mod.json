@@ -9,8 +9,9 @@
     "Naho (26.1.2 port)"
   ],
   "contact": {
-    "sources": "https://github.com/${github}/${name}",
-    "issues": "https://github.com/${github}/${name}/issues"
+    "homepage": "https://github.com/txnimc/ImmersiveLanterns",
+    "sources": "https://github.com/eoNaho/ImmersiveLanterns-Port",
+    "issues": "https://github.com/eoNaho/ImmersiveLanterns-Port/issues"
   },
   "license": "${license}",
   "icon": "assets/${id}/textures/mod_logo.png",
