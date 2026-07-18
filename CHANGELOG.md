@@ -1,0 +1,1 @@
+Fix Curios rendering compat bug affecting other items
