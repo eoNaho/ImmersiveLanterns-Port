@@ -1,12 +1,17 @@
 {
   "trinkets.slot.legs.lantern": "Lanterna",
   "tag.item.trinkets.legs.lantern": "Lanternas",
-  "immersivelanterns.config.title": "Lanternas Imersivas",
+  "immersivelanterns.config.title": "Lanternas Imersivas — Toni e Naho",
   "immersivelanterns.config.side": "Lado da lanterna: %s",
   "immersivelanterns.config.left": "Esquerdo",
   "immersivelanterns.config.right": "Direito",
   "immersivelanterns.config.physics": "Física: %s",
   "immersivelanterns.config.scale": "Escala",
   "immersivelanterns.config.physics_strength": "Intensidade da física",
+  "immersivelanterns.config.damping": "Amortecimento",
+  "immersivelanterns.config.reset": "Restaurar padrões",
+  "immersivelanterns.config.reset_done": "Padrões restaurados",
+  "immersivelanterns.config.save_error": "Não foi possível salvar a configuração",
+  "immersivelanterns.config.preview": "Prévia animada",
   "immersivelanterns.config.value": "%s: %s"
 }

@@ -17,6 +17,7 @@ final class LanternConfig {
     boolean physics = true;
     float scale = 0.61F;
     float physicsStrength = 1.0F;
+    float damping = 0.72F;
 
     static LanternConfig get() {
         return instance;
@@ -34,15 +35,26 @@ final class LanternConfig {
         }
         instance.scale = Math.max(0.35F, Math.min(1.25F, instance.scale));
         instance.physicsStrength = Math.max(0.0F, Math.min(2.0F, instance.physicsStrength));
+        instance.damping = Math.max(0.55F, Math.min(0.92F, instance.damping));
     }
 
-    void save() {
+    void reset() {
+        rightSide = false;
+        physics = true;
+        scale = 0.61F;
+        physicsStrength = 1.0F;
+        damping = 0.72F;
+    }
+
+    boolean save() {
         try {
             Files.createDirectories(FILE.getParent());
             try (var writer = Files.newBufferedWriter(FILE)) {
                 GSON.toJson(this, writer);
             }
+            return true;
         } catch (IOException ignored) {
+            return false;
         }
     }
 }

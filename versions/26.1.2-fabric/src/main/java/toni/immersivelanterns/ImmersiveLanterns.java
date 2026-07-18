@@ -25,7 +25,7 @@ public final class ImmersiveLanterns implements ModInitializer, ClientModInitial
         LanternConfig.load();
         var renderer = new LanternTrinketRenderer();
         for (var item : BuiltInRegistries.ITEM) {
-            if (isLantern(new ItemStack(item))) {
+            if (item instanceof BlockItem blockItem && blockItem.getBlock() instanceof LanternBlock) {
                 LanternTrinketRenderer.register(item, renderer);
             }
         }

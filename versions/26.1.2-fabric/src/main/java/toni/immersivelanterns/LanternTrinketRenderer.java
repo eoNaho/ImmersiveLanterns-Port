@@ -56,7 +56,7 @@ final class LanternTrinketRenderer implements TrinketRenderer {
         var entity = slot.inventory().getAttachment().getEntity();
         var swing = PENDULUMS.computeIfAbsent(entity, ignored -> new Pendulum(entity));
         if (config.physics) {
-            swing.update(entity, config.physicsStrength);
+            swing.update(entity, config.physicsStrength, config.damping, side);
         } else {
             swing.reset(entity);
         }
@@ -87,7 +87,6 @@ final class LanternTrinketRenderer implements TrinketRenderer {
 
     private static final class Pendulum {
         private static final float GRAVITY = 0.07F;
-        private static final float DAMPING = 0.72F;
         private static final float YAW_FORCE = 0.14F;
         private static final float SWING_MAX = 28.0F;
         private static final float BOUNCE_FORCE = 8.0F;
@@ -109,6 +108,8 @@ final class LanternTrinketRenderer implements TrinketRenderer {
         private float fallDistance;
         private float previousLocalForward;
         private float previousLocalSide;
+        private float smoothedLocalForward;
+        private float smoothedLocalSide;
         private boolean wasCrouching;
 
         private Pendulum(LivingEntity entity) {
@@ -118,7 +119,7 @@ final class LanternTrinketRenderer implements TrinketRenderer {
             wasOnGround = entity.onGround();
         }
 
-        private void update(LivingEntity entity, float strength) {
+        private void update(LivingEntity entity, float strength, float damping, float lanternSide) {
             if (lastTick == entity.tickCount) {
                 return;
             }
@@ -129,7 +130,8 @@ final class LanternTrinketRenderer implements TrinketRenderer {
             var verticalSpeed = (float) (entity.getY() - previousY);
             previousY = entity.getY();
             var onGround = entity.onGround();
-            if (!onGround && verticalSpeed < 0.0F) {
+            var airbornePhysics = !entity.isPassenger() && !entity.isFallFlying() && !entity.isVisuallySwimming();
+            if (airbornePhysics && !onGround && verticalSpeed < 0.0F) {
                 peakFallSpeed = Math.max(peakFallSpeed, -verticalSpeed);
                 fallDistance += -verticalSpeed;
             }
@@ -142,11 +144,18 @@ final class LanternTrinketRenderer implements TrinketRenderer {
             var cosYaw = (float) Math.cos(yawRadians);
             var localForward = (float) (movement.z * cosYaw + movement.x * sinYaw);
             var localSide = (float) (movement.x * cosYaw - movement.z * sinYaw);
+            smoothedLocalForward = Mth.lerp(0.32F, smoothedLocalForward, Math.abs(localForward) < 0.002F ? 0.0F : localForward);
+            smoothedLocalSide = Mth.lerp(0.32F, smoothedLocalSide, Math.abs(localSide) < 0.002F ? 0.0F : localSide);
             var movementMultiplier = entity.isSprinting() ? 1.45F : entity.isCrouching() ? 0.65F : 1.0F;
-            pitchVelocity += (localForward - previousLocalForward) * -18.0F * movementMultiplier * strength;
-            rollVelocity += (localSide - previousLocalSide) * 16.0F * movementMultiplier * strength;
-            previousLocalForward = localForward;
-            previousLocalSide = localSide;
+            if (entity.isVisuallySwimming()) movementMultiplier *= 0.5F;
+            if (entity.isFallFlying()) movementMultiplier *= 0.3F;
+            if (entity.isPassenger()) movementMultiplier *= 0.35F;
+            var forwardAcceleration = Mth.clamp(smoothedLocalForward - previousLocalForward, -0.08F, 0.08F);
+            var sideAcceleration = Mth.clamp(smoothedLocalSide - previousLocalSide, -0.08F, 0.08F);
+            pitchVelocity += forwardAcceleration * -18.0F * movementMultiplier * strength;
+            rollVelocity += sideAcceleration * 16.0F * movementMultiplier * strength;
+            previousLocalForward = smoothedLocalForward;
+            previousLocalSide = smoothedLocalSide;
 
             if (entity.isCrouching() && !wasCrouching) {
                 pitchVelocity += 3.5F * strength;
@@ -156,15 +165,18 @@ final class LanternTrinketRenderer implements TrinketRenderer {
 
             rollVelocity += yawDelta * YAW_FORCE * strength;
             rollVelocity -= roll * GRAVITY;
-            rollVelocity *= DAMPING;
-            roll = Mth.clamp(roll + rollVelocity, -SWING_MAX, SWING_MAX);
+            rollVelocity *= damping;
+            var inwardLimit = entity.isCrouching() || entity.isPassenger() ? 12.0F : 18.0F;
+            var minRoll = lanternSide > 0.0F ? -inwardLimit : -SWING_MAX;
+            var maxRoll = lanternSide > 0.0F ? SWING_MAX : inwardLimit;
+            roll = Mth.clamp(roll + rollVelocity, minRoll, maxRoll);
 
-            if (!onGround && verticalSpeed < -0.05F) {
+            if (airbornePhysics && !onGround && verticalSpeed < -0.05F) {
                 var targetPitch = -(float) Math.min(Math.sqrt(fallDistance * 2.5F) * 26.0F, 90.0F);
                 pitchVelocity += (targetPitch - pitch) * 0.08F * strength;
             }
             pitchVelocity -= pitch * GRAVITY;
-            pitchVelocity *= DAMPING;
+            pitchVelocity *= damping;
             pitch = Mth.clamp(pitch + pitchVelocity, -90.0F, BOUNCE_MAX_ANGLE);
 
             if (onGround && !wasOnGround) {
@@ -197,6 +209,8 @@ final class LanternTrinketRenderer implements TrinketRenderer {
             wasOnGround = entity.onGround();
             previousLocalForward = 0.0F;
             previousLocalSide = 0.0F;
+            smoothedLocalForward = 0.0F;
+            smoothedLocalSide = 0.0F;
             pitch = previousPitch = pitchVelocity = 0.0F;
             roll = previousRoll = rollVelocity = 0.0F;
             peakFallSpeed = fallDistance = 0.0F;

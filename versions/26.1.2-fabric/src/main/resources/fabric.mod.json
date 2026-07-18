@@ -3,8 +3,11 @@
   "id": "${id}",
   "name": "${display_name}",
   "version": "${modversion}",
-  "description": "Renders equipped lanterns with movement and dynamic light through Trinkets Updated.",
-  "authors": ["${author}"],
+  "description": "Originally created by Toni and ported to Minecraft 26.1.2 by Naho. Renders equipped lanterns with movement and dynamic light through Trinkets Updated.",
+  "authors": [
+    "Toni (original creator)",
+    "Naho (26.1.2 port)"
+  ],
   "contact": {
     "sources": "https://github.com/${github}/${name}",
     "issues": "https://github.com/${github}/${name}/issues"

@@ -5,9 +5,12 @@ import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 final class LanternConfigScreen extends Screen {
     private final Screen parent;
+    private Component saveStatus = Component.empty();
 
     LanternConfigScreen(Screen parent) {
         super(Component.translatable("immersivelanterns.config.title"));
@@ -18,7 +21,7 @@ final class LanternConfigScreen extends Screen {
     protected void init() {
         var config = LanternConfig.get();
         var left = width / 2 - 100;
-        var top = height / 2 - 80;
+        var top = height / 2 - 92;
 
         addRenderableWidget(Button.builder(sideLabel(), button -> {
             config.rightSide = !config.rightSide;
@@ -42,8 +45,20 @@ final class LanternConfigScreen extends Screen {
                 value -> config.physicsStrength = (float) (value * 2.0F),
                 () -> config.physicsStrength));
 
+        addRenderableWidget(new ConfigSlider(left, top + 104,
+                Component.translatable("immersivelanterns.config.damping"),
+                (config.damping - 0.55F) / 0.37F,
+                value -> config.damping = (float) (0.55F + value * 0.37F),
+                () -> config.damping));
+
+        addRenderableWidget(Button.builder(Component.translatable("immersivelanterns.config.reset"), button -> {
+            config.reset();
+            saveStatus = Component.translatable("immersivelanterns.config.reset_done");
+            rebuildWidgets();
+        }).bounds(left, top + 136, 98, 20).build());
+
         addRenderableWidget(Button.builder(Component.translatable("gui.done"), button -> onClose())
-                .bounds(left, top + 116, 200, 20).build());
+                .bounds(left + 102, top + 136, 98, 20).build());
     }
 
     private Component sideLabel() {
@@ -60,14 +75,25 @@ final class LanternConfigScreen extends Screen {
 
     @Override
     public void onClose() {
-        LanternConfig.get().save();
-        minecraft.setScreen(parent);
+        if (LanternConfig.get().save()) {
+            minecraft.setScreen(parent);
+        } else {
+            saveStatus = Component.translatable("immersivelanterns.config.save_error");
+        }
     }
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         graphics.centeredText(font, title, width / 2, height / 2 - 108, 0xFFFFFFFF);
+        var preview = minecraft.player == null ? ItemStack.EMPTY : ImmersiveLanterns.getEquipped(minecraft.player);
+        if (preview.isEmpty()) preview = new ItemStack(Items.LANTERN);
+        var bob = LanternConfig.get().physics ? (int) Math.round(Math.sin(System.currentTimeMillis() / 240.0) * 2.0) : 0;
+        graphics.item(preview, width / 2 - 8, height / 2 + 72 + bob);
+        if (!saveStatus.getString().isEmpty()) {
+            graphics.centeredText(font, saveStatus, width / 2, height / 2 + 106,
+                    saveStatus.getString().equals(Component.translatable("immersivelanterns.config.save_error").getString()) ? 0xFFFF5555 : 0xFF55FF55);
+        }
     }
 
     private static final class ConfigSlider extends AbstractSliderButton {
@@ -88,7 +114,7 @@ final class LanternConfigScreen extends Screen {
         @Override
         protected void updateMessage() {
             setMessage(Component.translatable("immersivelanterns.config.value", label,
-                    String.format(java.util.Locale.ROOT, "%.2f", getter.getAsDouble())));
+                    String.format(java.util.Locale.ROOT, "%d%%", Math.round(getter.getAsDouble() * 100.0))));
         }
 
         @Override
